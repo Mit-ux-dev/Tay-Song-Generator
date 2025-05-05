@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taylor Swift Random Song Suggester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0, #f0f0f0, #e0e0e0);
+            background-size: 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #4a4a4a;
+        }
+        .album-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .album {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .album:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 111, 97, 0.5);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        select, button {
+            padding: 10px;
+            font-size: 1em;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        select {
+            background: linear-gradient(135deg, #ffffff, #e0e0e0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 111, 97, 0.5);
+        }
+        button {
+            background-color: #ff6f61;
+            color: white;
+        }
+        button:hover {
+            background-color: #e55a50;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #result {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .music-player {
+            background: linear-gradient(135deg, #ffffff, #e0e0e0);
+            border-radius: 20px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .music-player img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .song-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin: 5px 0;
+        }
+        .singer-name {
+            font-size: 1.2em;
+            color: #666;
+            margin: 5px 0;
+        }
+        .album-name {
+            font-size: 1em;
+            color: #999;
+            margin: 5px 0;
+        }
+        .error-message {
+            font-size: 1.5em;
+            color: #ff6f61;
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            font-size: 1em;
+            color: #333;
+            opacity: 0.8;
+        }
+        footer a {
+            color: #ff6f61;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #e55a50;
+        }
+        @keyframes wave {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        .album {
+            animation: wave 2s infinite;
+        }
+        .album:nth-child(1) { animation-delay: 0s; }
+        .album:nth-child(2) { animation-delay: 0.2s; }
+        .album:nth-child(3) { animation-delay: 0.4s; }
+        .album:nth-child(4) { animation-delay: 0.6s; }
+        .album:nth-child(5) { animation-delay: 0.8s; }
+        .album:nth-child(6) { animation-delay: 1s; }
+        .album:nth-child(7) { animation-delay: 1.2s; }
+        .album:nth-child(8) { animation-delay: 1.4s; }
+        .album:nth-child(9) { animation-delay: 1.6s; }
+        .album:nth-child(10) { animation-delay: 1.8s; }
+        .album:nth-child(11) { animation-delay: 2s; }
+        @media (max-width: 600px) {
+            .album {
+                width: 60px;
+                height: 60px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .music-player {
+                width: 250px;
+            }
+            .music-player img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Taylor Swift Random Song Suggester</h1>
+    <div class="album-container">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b2732f8c0fd72a80a93f8c53b96c" alt="Taylor Swift">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b273a48964b5d9a3d6968ae3e0de" alt="Fearless">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b2730b04da4f224b51ff86e0a481" alt="Speak Now">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b273318443aab3531a0558e79a4d" alt="Red">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b273904445d70d04eb24d6bb79ac" alt="1989">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b273da5d5aeeabacacc1263c0f4b" alt="reputation">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647" alt="Lover">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b27395f754318336a07e85ec59bc" alt="folklore">
+        <img class="album" src="https://i.scdn.co/image/ab67616d0000b27333b8541201f1ef38941024be" alt="evermore">
+        <img class="album" src="https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5" alt="Midnights">
+        <img class="album" src="https://i.scdn.co/image/ab67616d00001e02fb3cda178f23d8326be8fdbe" alt="The Tortured Poets Department">
+    </div>
+    <div class="controls">
+        <select id="albumSelect">
+            <option value="" disabled selected>Select an album</option>
+            <option value="Taylor Swift">Taylor Swift</option>
+            <option value="Fearless">Fearless</option>
+            <option value="Speak Now">Speak Now</option>
+            <option value="Red">Red</option>
+            <option value="1989">1989</option>
+            <option value="reputation">reputation</option>
+            <option value="Lover">Lover</option>
+            <option value="folklore">folklore</option>
+            <option value="evermore">evermore</option>
+            <option value="Midnights">Midnights</option>
+            <option value="The Tortured Poets Department">The Tortured Poets Department</option>
+        </select>
+        <button onclick="suggestSong()">Get a Song Suggestion</button>
+    </div>
+    <div id="result">
+        <div class="music-player" id="musicPlayer">
+            <img id="albumArt" src="" alt="Album Art">
+            <div class="song-name" id="songName"></div>
+            <div class="singer-name">Taylor Swift</div>
+            <div class="album-name" id="albumName"></div>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+    <footer>
+        This website is developed by a <a href="https://en.wikipedia.org/wiki/Swiftie" target="_blank">Swiftie</a> 💞 from India with love.
+    </footer>
+
+    <script>
+        const albums = {
+            "Taylor Swift": {
+                songs: [
+                    "Tim McGraw", "Picture to Burn", "Teardrops on My Guitar", "A Place in This World",
+                    "Cold as You", "The Outside", "Tied Together with a Smile", "Stay Beautiful",
+                    "Should've Said No", "Mary's Song (Oh My My My)", "Our Song"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b2732f8c0fd72a80a93f8c53b96c"
+            },
+            "Fearless": {
+                songs: [
+                    "Fearless", "Fifteen", "Love Story", "Hey Stephen", "White Horse", "You Belong with Me",
+                    "Breathe", "Tell Me Why", "You're Not Sorry", "The Way I Loved You", "Forever & Always",
+                    "The Best Day", "Change"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b273a48964b5d9a3d6968ae3e0de"
+            },
+            "Speak Now": {
+                songs: [
+                    "Mine", "Sparks Fly", "Back to December", "Speak Now", "Dear John", "Mean",
+                    "The Story of Us", "Never Grow Up", "Enchanted", "Better Than Revenge", "Innocent",
+                    "Haunted", "Last Kiss", "Long Live"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b2730b04da4f224b51ff86e0a481"
+            },
+            "Red": {
+                songs: [
+                    "State of Grace", "Red", "Treacherous", "I Knew You Were Trouble", "All Too Well",
+                    "22", "I Almost Do", "We Are Never Ever Getting Back Together", "Stay Stay Stay",
+                    "The Last Time", "Holy Ground", "Sad Beautiful Tragic", "The Lucky One", "Everything Has Changed",
+                    "Starlight", "Begin Again"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b273318443aab3531a0558e79a4d"
+            },
+            "1989": {
+                songs: [
+                    "Welcome to New York", "Blank Space", "Style", "Out of the Woods", "All You Had to Do Was Stay",
+                    "Shake It Off", "I Wish You Would", "Bad Blood", "Wildest Dreams", "How You Get the Girl",
+                    "This Love", "I Know Places", "Clean"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b273904445d70d04eb24d6bb79ac"
+            },
+            "reputation": {
+                songs: [
+                    "...Ready for It?", "End Game", "I Did Something Bad", "Don't Blame Me", "Delicate",
+                    "Look What You Made Me Do", "So It Goes...", "Gorgeous", "Getaway Car", "King of My Heart",
+                    "Dancing with Our Hands Tied", "Dress", "This Is Why We Can't Have Nice Things", "Call It What You Want",
+                    "New Year's Day"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b273da5d5aeeabacacc1263c0f4b"
+            },
+            "Lover": {
+                songs: [
+                    "I Forgot That You Existed", "Cruel Summer", "Lover", "The Man", "The Archer", "I Think He Knows",
+                    "Miss Americana & the Heartbreak Prince", "Paper Rings", "Cornelia Street", "Death by a Thousand Cuts",
+                    "London Boy", "Soon You'll Get Better", "False God", "You Need to Calm Down", "Afterglow",
+                    "Me!", "It's Nice to Have a Friend", "Daylight"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647"
+            },
+            "folklore": {
+                songs: [
+                    "the 1", "cardigan", "the last great american dynasty", "exile", "my tears ricochet", "mirrorball",
+                    "seven", "august", "this is me trying", "illicit affairs", "invisible string", "mad woman",
+                    "epiphany", "betty", "peace", "hoax"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b27395f754318336a07e85ec59bc"
+            },
+            "evermore": {
+                songs: [
+                    "willow", "champagne problems", "gold rush", "‘tis the damn season", "tolerate it", "no body, no crime",
+                    "happiness", "dorothea", "coney island", "ivy", "cowboy like me", "long story short", "marjorie",
+                    "closure", "evermore"
+                ],
+                image: "https://i.scdn.co/image/ab67616d0000b27333b8541201f1ef38941024be"
+            },
+            "Midnights": {
+                songs: [
+                    "Lavender Haze", "Maroon", "Anti-Hero", "Snow on the Beach", "You're on Your Own, Kid", "Midnight Rain",
+                    "Question...?", "Vigilante Shit", "Bejeweled", "Labyrinth", "Karma", "Sweet Nothing", "Mastermind"
+                ],
+                image: "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5"
+            },
+            "The Tortured Poets Department": {
+                songs: [
+                    "Fortnight", "The Tortured Poets Department", "My Boy Only Breaks His Favorite Toys", "Down Bad",
+                    "So Long, London", "But Daddy I Love Him", "Fresh Out the Slammer", "Florida!!!", "Guilty as Sin?",
+                    "Who's Afraid of Little Old Me?", "I Can Fix Him (No Really I Can)", "loml", "I Can Do It With a Broken Heart",
+                    "The Smallest Man Who Ever Lived", "The Alchemy", "Clara Bow"
+                ],
+                image: "https://i.scdn.co/image/ab67616d00001e02fb3cda178f23d8326be8fdbe"
+            }
+        };
+
+        function suggestSong() {
+            const albumSelect = document.getElementById("albumSelect");
+            const musicPlayer = document.getElementById("musicPlayer");
+            const albumArt = document.getElementById("albumArt");
+            const songName = document.getElementById("songName");
+            const albumName = document.getElementById("albumName");
+            const errorMessage = document.getElementById("errorMessage");
+            const selectedAlbum = albumSelect.value;
+
+            // Reset displays
+            musicPlayer.style.display = "none";
+            errorMessage.textContent = "";
+
+            if (!selectedAlbum) {
+                errorMessage.textContent = "Please select an album!";
+                return;
+            }
+
+            const album = albums[selectedAlbum];
+            const randomSong = album.songs[Math.floor(Math.random() * album.songs.length)];
+
+            // Update music player content
+            albumArt.src = album.image;
+            albumArt.alt = selectedAlbum;
+            songName.textContent = randomSong;
+            albumName.textContent = selectedAlbum;
+
+            // Show music player
+            musicPlayer.style.display = "block";
+        }
+    </script>
+</body>
+</html>
